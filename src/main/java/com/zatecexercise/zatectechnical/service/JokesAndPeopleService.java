@@ -1,14 +1,17 @@
 package com.zatecexercise.zatectechnical.service;
 
 import com.zatecexercise.zatectechnical.config.OperationResult;
+import com.zatecexercise.zatectechnical.dataMapper.PeopleAndJokeSearchResultMapper;
 import com.zatecexercise.zatectechnical.dataMapper.PeopleSearchResultMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Service
@@ -34,41 +37,35 @@ public class JokesAndPeopleService {
         return operationResult;
     }
 
-    public OperationResult searchJoke(String searchKey){
-        log.info("Inside searchJoke method of JokesAndPeopleService");
-        Map<String, String> params = new HashMap<>();
-        HttpHeaders headers = new HttpHeaders();
-        HttpEntity requestEntity = new HttpEntity<>(headers);
-        params.put("query", searchKey);
-        ResponseEntity<Object> searchResult = restTemplate.exchange("https://api.chucknorris.io/jokes/search?query={query}", HttpMethod.GET, requestEntity, Object.class, params);
-        operationResult = new OperationResult(OperationResult.OPERATION_SUCCESSFUL_MESSAGE, searchResult.getBody());
-        return operationResult;
-    }
-
-    public OperationResult searchPeople(String searchKey){
-        log.info("Inside searchPeople method of JokesAndPeopleService");
-        Map<String, String> params = new HashMap<>();
-        HttpHeaders headers = new HttpHeaders();
-        HttpEntity requestEntity = new HttpEntity<>(headers);
-        params.put("search", searchKey);
-        ResponseEntity<Object> searchResult = restTemplate.exchange("https://swapi.dev/api/people/?search={search}", HttpMethod.GET, requestEntity, Object.class, params);
-        operationResult = new OperationResult(OperationResult.OPERATION_SUCCESSFUL_MESSAGE, searchResult.getBody());
-        return operationResult;
-    }
-
-    public OperationResult searchJokeOrPerson(String searchKey){
+    public OperationResult searchJokeOrPerson(String searchKey) {
         log.info("Inside searchJokeOrPerson method of JokesAndPeopleService");
+
+        PeopleAndJokeSearchResultMapper resultMapper = new PeopleAndJokeSearchResultMapper();
+
         Map<String, String> params = new HashMap<>();
+        params.put("search", searchKey);
+        params.put("query", searchKey);
         HttpHeaders headers = new HttpHeaders();
         HttpEntity requestEntity = new HttpEntity<>(headers);
-        params.put("search", searchKey);
 
         ResponseEntity<Object> searchResult;
 
+        searchResult = restTemplate.exchange("https://api.chucknorris.io/jokes/search?query={query}", HttpMethod.GET, requestEntity, Object.class, params);
+        Object jokeSearchResult = searchResult.getBody();
         searchResult = restTemplate.exchange("https://swapi.dev/api/people/?search={search}", HttpMethod.GET, requestEntity, Object.class, params);
-        Object peopleSearchResult = searchResult.getBody();
-        System.out.println(peopleSearchResult);
-        operationResult = new OperationResult(OperationResult.OPERATION_SUCCESSFUL_MESSAGE, peopleSearchResult);
+
+        LinkedHashMap peopleSearchResult = (LinkedHashMap) searchResult.getBody();
+
+        if((int) peopleSearchResult.get("count") == 0){
+            resultMapper.setApiName("Jokes api");
+            resultMapper.setResult(jokeSearchResult);
+        }
+        else{
+            resultMapper.setApiName("People api");
+            resultMapper.setResult(peopleSearchResult);
+        }
+
+        operationResult = new OperationResult(OperationResult.OPERATION_SUCCESSFUL_MESSAGE, resultMapper);
         return operationResult;
     }
 }
