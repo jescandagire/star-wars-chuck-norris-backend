@@ -31,9 +31,7 @@ public class JokesAndPeopleController {
     @GetMapping("/chuck/categories/details")
     public ResponseEntity<OperationResult> getJokeCategoryDetails(@RequestParam("jokeName") String jokeName){
         log.info("Inside getJokeCategoryDetails method of JokesAndPeopleController");
-        if(jokeName.length() < 3){
-            throw new SearchKeyLengthException("The length of the search key should be at least 3 characters");
-        }
+
         return ResponseEntity.status(HttpStatus.OK).body(jokesAndPeopleService.getJokeCategoryDetails(jokeName));
     }
 
@@ -46,9 +44,7 @@ public class JokesAndPeopleController {
     @GetMapping("/search")
     public ResponseEntity<OperationResult> searchJokeOrPerson(@RequestParam("searchKey") String searchKey) {
         log.info("Inside searchJokeOrPerson method of JokesAndPeopleController");
-        if(searchKey.length() < 3){
-            throw new SearchKeyLengthException("The length of the search key should be at least 3 characters");
-        }
+
         return ResponseEntity.status(HttpStatus.OK).body(jokesAndPeopleService.searchJokeOrPerson(searchKey));
     }
 }

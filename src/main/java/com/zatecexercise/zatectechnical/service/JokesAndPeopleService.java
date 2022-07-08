@@ -3,6 +3,7 @@ package com.zatecexercise.zatectechnical.service;
 import com.zatecexercise.zatectechnical.config.OperationResult;
 import com.zatecexercise.zatectechnical.dataMapper.PeopleAndJokeSearchResultMapper;
 import com.zatecexercise.zatectechnical.dataMapper.PeopleSearchResultMapper;
+import com.zatecexercise.zatectechnical.exception.SearchKeyLengthException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -41,6 +42,10 @@ public class JokesAndPeopleService {
     public OperationResult searchJokeOrPerson(String searchKey) {
         log.info("Inside searchJokeOrPerson method of JokesAndPeopleService");
 
+        if(searchKey.length() < 3){
+            throw new SearchKeyLengthException("The length of the search key should be at least 3 characters");
+        }
+
         PeopleAndJokeSearchResultMapper resultMapper = new PeopleAndJokeSearchResultMapper();
 
         Map<String, String> params = new HashMap<>();
@@ -73,6 +78,10 @@ public class JokesAndPeopleService {
 
     public OperationResult getJokeCategoryDetails(String jokeName){
         log.info("Inside getJokeCategoryDetails method of JokesAndPeopleService");
+
+        if(jokeName.length() < 3){
+            throw new SearchKeyLengthException("The length of the search key should be at least 3 characters");
+        }
         Map<String, String> params = new HashMap<>();
         params.put("search", jokeName);
         HttpHeaders headers = new HttpHeaders();
