@@ -28,6 +28,15 @@ public class JokesAndPeopleController {
         return ResponseEntity.status(HttpStatus.OK).body(jokesAndPeopleService.findAllJokesCategories());
     }
 
+    @GetMapping("/chuck/categories/details")
+    public ResponseEntity<OperationResult> getJokeCategoryDetails(@RequestParam("jokeName") String jokeName){
+        log.info("Inside getJokeCategoryDetails method of JokesAndPeopleController");
+        if(jokeName.length() < 3){
+            throw new SearchKeyLengthException("The length of the search key should be at least 3 characters");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(jokesAndPeopleService.getJokeCategoryDetails(jokeName));
+    }
+
     @GetMapping("/swapi/people")
     public ResponseEntity<OperationResult> getAllPeople(){
         log.info("Inside getAllPeople method of JokesAndPeopleController");

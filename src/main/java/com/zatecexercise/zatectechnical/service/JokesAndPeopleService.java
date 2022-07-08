@@ -24,6 +24,7 @@ public class JokesAndPeopleService {
 
     public OperationResult findAllJokesCategories(){
         log.info("Inside findAllJokesCategories method of JokesAndPeopleService");
+
         String[] jokesCategories = restTemplate.getForObject("https://api.chucknorris.io/jokes/categories", String[].class);
         operationResult = new OperationResult(OperationResult.OPERATION_SUCCESSFUL_MESSAGE, jokesCategories);
         return operationResult;
@@ -44,19 +45,20 @@ public class JokesAndPeopleService {
 
         Map<String, String> params = new HashMap<>();
         params.put("search", searchKey);
-        params.put("query", searchKey);
         HttpHeaders headers = new HttpHeaders();
         HttpEntity requestEntity = new HttpEntity<>(headers);
 
         ResponseEntity<Object> searchResult;
 
-        searchResult = restTemplate.exchange("https://api.chucknorris.io/jokes/search?query={query}", HttpMethod.GET, requestEntity, Object.class, params);
+        searchResult = restTemplate.exchange("https://api.chucknorris.io/jokes/search?query={search}", HttpMethod.GET, requestEntity, Object.class, params);
         Object jokeSearchResult = searchResult.getBody();
         searchResult = restTemplate.exchange("https://swapi.dev/api/people/?search={search}", HttpMethod.GET, requestEntity, Object.class, params);
 
         LinkedHashMap peopleSearchResult = (LinkedHashMap) searchResult.getBody();
 
-        if((int) peopleSearchResult.get("count") == 0){
+        int peopleCount = (int) peopleSearchResult.get("count");
+
+        if( peopleCount == 0){
             resultMapper.setApiName("Jokes api");
             resultMapper.setResult(jokeSearchResult);
         }
@@ -67,5 +69,19 @@ public class JokesAndPeopleService {
 
         operationResult = new OperationResult(OperationResult.OPERATION_SUCCESSFUL_MESSAGE, resultMapper);
         return operationResult;
+    }
+
+    public OperationResult getJokeCategoryDetails(String jokeName){
+        log.info("Inside getJokeCategoryDetails method of JokesAndPeopleService");
+        Map<String, String> params = new HashMap<>();
+        params.put("search", jokeName);
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity requestEntity = new HttpEntity<>(headers);
+
+        ResponseEntity<Object> result = restTemplate.exchange("https://api.chucknorris.io/jokes/random?category={search}", HttpMethod.GET, requestEntity, Object.class, params);
+
+        Object categoryDetails = result.getBody();
+
+        return new OperationResult(OperationResult.OPERATION_SUCCESSFUL_MESSAGE, categoryDetails);
     }
 }
